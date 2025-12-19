@@ -78,6 +78,9 @@ def now_iso():
     return datetime.now(timezone.utc).isoformat()
 
 def main():
+    # SAFETY SETTINGS (do not remove during testing)
+    TEST_EMAIL = os.environ.get("TEST_EMAIL")   # personal email from GitHub secret
+
     records = fetch_pending_records(max_records=1)
     if not records:
         print("No pending emails.")
@@ -94,6 +97,10 @@ def main():
         interviewer = (f.get("Interviewer") or "").strip()
         interviewer_email = (f.get("Interviewer Email") or "").strip()
         link = (f.get("Calendly Link") or "").strip()
+
+        # Hard override: send ONLY to 1 email
+        if TEST_EMAIL:
+            email = TEST_EMAIL
 
         if not email or not link:
             update_record(rid, {"Mail Status": "Failed", "Error": "Missing Candidate Email or Calendly Link"})
