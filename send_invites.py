@@ -42,15 +42,46 @@ def update_record(record_id, fields):
     )
     r.raise_for_status()
 
-def send_email(to_email, to_name, round_name, calendly_link):
-    subject = f"Interview Invitation – {round_name}"
+def send_email(
+    to_email,
+    to_name,
+    company_name,
+    round_name,
+    interviewer_name,
+    interviewer_email,
+    calendly_link
+):
+    subject = f"{company_name} | Interview Invitation – {round_name}"
+
     body = (
         f"Hi {to_name or 'there'},\n\n"
-        f"You have been invited for {round_name}.\n\n"
-        f"Please book a suitable slot using the Calendly link below:\n"
+        f"Thank you for your interest in opportunities at {company_name}.\n\n"
+        f"We are pleased to invite you to proceed with {round_name} as part of our interview process.\n\n"
+        f"Interview details:\n"
+        f"- Interviewer: {interviewer_name}\n"
+        f"- Interviewer Email: {interviewer_email}\n\n"
+        f"Please use the Calendly link below to schedule your interview at a time that works best for you:\n"
         f"{calendly_link}\n\n"
-        f"Best regards,\n{FROM_NAME}"
+        f"If you face any issues while booking a slot or have questions regarding the interview, "
+        f"feel free to reply to this email or reach out directly to the interviewer.\n\n"
+        f"Best regards,\n"
+        f"{company_name}"
     )
+
+    payload = {
+        "from": {"email": FROM_EMAIL, "name": FROM_NAME},
+        "to": [{"email": to_email, "name": to_name or ""}],
+        "subject": subject,
+        "text": body,
+    }
+
+    return requests.post(
+        "https://api.mailersend.com/v1/email",
+        headers=mailersend_headers(),
+        json=payload,
+        timeout=30
+    )
+
 
     payload = {
         "from": {"email": FROM_EMAIL, "name": FROM_NAME},
