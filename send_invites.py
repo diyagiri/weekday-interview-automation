@@ -42,15 +42,7 @@ def update_record(record_id, fields):
     )
     r.raise_for_status()
 
-def send_email(
-    to_email,
-    to_name,
-    company_name,
-    round_name,
-    interviewer_name,
-    interviewer_email,
-    calendly_link
-):
+def send_email(to_email, to_name, company_name, round_name, interviewer_name, interviewer_email, calendly_link):
     subject = f"{company_name} | Interview Invitation – {round_name}"
 
     body = (
@@ -65,27 +57,12 @@ def send_email(
         f"If you face any issues while booking a slot or have questions regarding the interview, "
         f"feel free to reply to this email or reach out directly to the interviewer.\n\n"
         f"Best regards,\n"
-        f"{company_name}"
+        f"{FROM_NAME}"
     )
 
     payload = {
         "from": {"email": FROM_EMAIL, "name": FROM_NAME},
         "to": [{"email": to_email, "name": to_name or ""}],
-        "subject": subject,
-        "text": body,
-    }
-
-    return requests.post(
-        "https://api.mailersend.com/v1/email",
-        headers=mailersend_headers(),
-        json=payload,
-        timeout=30
-    )
-
-
-    payload = {
-        "from": {"email": FROM_EMAIL, "name": FROM_NAME},
-        "to": [{"email": to_email, "name": to_name}],
         "subject": subject,
         "text": body,
     }
@@ -112,35 +89,41 @@ def main():
 
         email = (f.get("Candidate Email") or "").strip()
         name = (f.get("Candidate") or "").strip()
+        company = (f.get("Company") or "").strip()
         round_name = (f.get("Rounds") or "").strip()
+        interviewer = (f.get("Interviewer") or "").strip()
+        interviewer_email = (f.get("Interviewer Email") or "").strip()
         link = (f.get("Calendly Link") or "").strip()
 
         if not email or not link:
-            update_record(rid, {
-                "Mail Status": "Failed",
-                "Error": "Missing email or Calendly link"
-            })
+            update_record(rid, {"Mail Status": "Failed", "Error": "Missing Candidate Email or Calendly Link"})
             continue
 
+        # Avoid blank company in subject/body
+        if not company:
+            company = "Weekday"
+
         try:
-            resp = send_email(email, name, round_name, link)
+            resp = send_email(
+                to_email=email,
+                to_name=name,
+                company_name=company,
+                round_name=round_name or "Interview Round",
+                interviewer_name=interviewer or "Interviewer",
+                interviewer_email=interviewer_email or "N/A",
+                calendly_link=link
+            )
+
             if resp.ok:
-                update_record(rid, {
-                    "Mail Status": "Sent",
-                    "Mail Sent Time": now_iso(),
-                    "Error": ""
-                })
+                update_record(rid, {"Mail Status": "Sent", "Mail Sent Time": now_iso(), "Error": ""})
                 print(f"Sent → {email}")
             else:
-                update_record(rid, {
-                    "Mail Status": "Failed",
-                    "Error": f"{resp.status_code}: {resp.text[:300]}"
-                })
+                update_record(rid, {"Mail Status": "Failed", "Error": f"{resp.status_code}: {resp.text[:300]}"})
+                print(f"Failed → {email} ({resp.status_code})")
+
         except Exception as e:
-            update_record(rid, {
-                "Mail Status": "Failed",
-                "Error": str(e)[:300]
-            })
+            update_record(rid, {"Mail Status": "Failed", "Error": str(e)[:300]})
+            print(f"Exception → {email}: {e}")
 
 if __name__ == "__main__":
     main()
