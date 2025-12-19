@@ -99,7 +99,7 @@ TAT = Mail Sent Time – Added On Time
 ```text
 IF(
   AND({Mail Sent Time}, {Added On}),
-  DATETIME_DIFF({Mail Sent Time}, {Added On}, "minutes"),
+  DATETIME_DIFF({Mail Sent Time}, {Added On}, "hours"),
   BLANK()
 )
 ```
@@ -111,7 +111,7 @@ IF(
 1. Open the `Interview_Rounds` table  
 2. Apply a filter:
 ```
-TAT (minutes) → is not empty
+TAT (hours) → is not empty
 ```
 3. This view shows **only successfully sent interview invites**
 4. Records without a successful send intentionally remain blank
