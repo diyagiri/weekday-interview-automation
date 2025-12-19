@@ -5,6 +5,10 @@ This repository contains an end-to-end automated workflow designed to streamline
 The solution integrates **Airtable**, **MailerSend**, and **automation scripts** to handle data cleaning, interview invite emails, and turnaround time (TAT) calculation.
 
 ---
+## 🔗 Airtable Base
+
+Read-only access to the Airtable base used in this project:
+[https://airtable.com/appf2ahgL7Gmv1rbW/shrPL7xpYrgGXRnCR](https://airtable.com/appf2ahgL7GmvlrbW/shrPL7xpYrgGXRnCR)
 
 ## 📌 Project Overview
 
