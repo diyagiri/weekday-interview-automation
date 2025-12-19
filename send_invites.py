@@ -24,7 +24,7 @@ def mailersend_headers():
         "Content-Type": "application/json",
     }
 
-def fetch_pending_records(max_records=1):
+def fetch_pending_records(max_records=10): #Test Number
     params = {
         "filterByFormula": "{Mail Status}='Pending'",
         "maxRecords": max_records
@@ -79,9 +79,15 @@ def now_iso():
 
 def main():
     # SAFETY SETTINGS (do not remove during testing)
-    TEST_EMAIL = os.environ.get("TEST_EMAIL")   # personal email from GitHub secret
+    # TEST_EMAIL = os.environ.get("TEST_EMAIL")   # personal email from GitHub secret
+    # records = fetch_pending_records(max_records=1)
 
-    records = fetch_pending_records(max_records=1)
+    # NOTE:
+    # During local testing, sending was limited to a test email and a single record
+    # to avoid unintended bulk emails. Logic below represents the final automated flow.
+
+
+    records = fetch_pending_records()
     if not records:
         print("No pending emails.")
         return
@@ -99,8 +105,8 @@ def main():
         link = (f.get("Calendly Link") or "").strip()
 
         # Hard override: send ONLY to 1 email
-        if TEST_EMAIL:
-            email = TEST_EMAIL
+        # if TEST_EMAIL:
+        #    email = TEST_EMAIL
 
         if not email or not link:
             update_record(rid, {"Mail Status": "Failed", "Error": "Missing Candidate Email or Calendly Link"})
