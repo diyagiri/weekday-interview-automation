@@ -24,7 +24,7 @@ def mailersend_headers():
         "Content-Type": "application/json",
     }
 
-def fetch_pending_records(max_records=25):
+def fetch_pending_records(max_records=1):
     params = {
         "filterByFormula": "{Mail Status}='Pending'",
         "maxRecords": max_records
@@ -78,7 +78,7 @@ def now_iso():
     return datetime.now(timezone.utc).isoformat()
 
 def main():
-    records = fetch_pending_records()
+    records = fetch_pending_records(max_records=1)
     if not records:
         print("No pending emails.")
         return
